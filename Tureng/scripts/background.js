@@ -20,3 +20,16 @@ chrome.contextMenus.create({
 //This tells the context menu what function to run when the option is selected
 
 chrome.contextMenus.onClicked.addListener(newTab);
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== 'show-translation-popup') {
+    return;
+  }
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || !tab.id) {
+    return;
+  }
+
+  chrome.tabs.sendMessage(tab.id, { type: 'TUR_ENG_SHOW_POPUP' });
+});
