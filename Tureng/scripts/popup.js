@@ -36,7 +36,7 @@ function tureng(str) {
   str = sanitize(str);
 
   $.get({
-    url: 'http://tureng.com/tr/turkce-ingilizce/' + str,
+    url: 'https://tureng.com/tr/turkce-ingilizce/' + str,
     complete: function(xhr) {
       if (xhr.status != 200) {
         notFound(str);
@@ -187,5 +187,5 @@ document.getElementById('flag-au').addEventListener('click', ()=>{
 
 // tureng-logo
 document.getElementById('tureng-logo').addEventListener('click', ()=>{
-  chrome.tabs.create({url: 'http://tureng.com/tr/turkce-ingilizce/'+document.getElementById('search-input').value});
+  chrome.tabs.create({url: 'https://tureng.com/tr/turkce-ingilizce/'+document.getElementById('search-input').value});
 });
