@@ -3,7 +3,7 @@
 
   const POPUP_ID = 'tureng-selection-popup';
   const STYLE_ID = 'tureng-selection-style';
-  const MAX_RESULTS = 5;
+  let MAX_RESULTS = 5;
 
   function ensureStyles() {
     if (document.getElementById(STYLE_ID)) {
@@ -166,7 +166,8 @@
   }
 
   const defaultSettings = {
-    modifier: 'alt'
+    modifier: 'alt',
+    maxResults: 5
   };
 
   let settings = { ...defaultSettings };
@@ -174,6 +175,7 @@
   function loadSettings() {
     chrome.storage.sync.get(defaultSettings, (stored) => {
       settings = { ...defaultSettings, ...stored };
+      MAX_RESULTS = settings.maxResults || 5;
     });
   }
 
@@ -233,6 +235,10 @@
     }
     if (changes.modifier) {
       settings.modifier = changes.modifier.newValue;
+    }
+    if (changes.maxResults) {
+      settings.maxResults = changes.maxResults.newValue;
+      MAX_RESULTS = settings.maxResults || 5;
     }
   });
 
