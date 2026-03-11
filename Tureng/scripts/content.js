@@ -85,9 +85,54 @@
     const panel = getPanel();
     panel.style.left = `${Math.max(8, position.x)}px`;
     panel.style.top = `${Math.max(8, position.y)}px`;
-    panel.innerHTML = `<div class="tureng-loading">Loading…</div>`;
+    const loading = document.createElement('div');
+    loading.className = 'tureng-loading';
+    loading.textContent = 'Loading…';
+    panel.replaceChildren(loading);
     panel.style.display = 'block';
     return panel;
+  }
+
+  function renderMessage(popup, className, message) {
+    const messageEl = document.createElement('div');
+    messageEl.className = className;
+    messageEl.textContent = message;
+    popup.replaceChildren(messageEl);
+  }
+
+  function renderResults(popup, term, results) {
+    const fragment = document.createDocumentFragment();
+    const title = document.createElement('div');
+    title.className = 'tureng-title';
+    title.textContent = term;
+    fragment.appendChild(title);
+
+    results.forEach((row) => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'tureng-row';
+
+      const wordEl = document.createElement('div');
+      wordEl.className = 'tureng-word';
+      wordEl.textContent = row.word;
+
+      const defEl = document.createElement('div');
+      defEl.className = 'tureng-def';
+      defEl.textContent = row.definition;
+
+      rowEl.appendChild(wordEl);
+      rowEl.appendChild(defEl);
+      fragment.appendChild(rowEl);
+    });
+
+    const link = document.createElement('a');
+    link.className = 'tureng-link';
+    link.href = `https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(term)}`;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Open in Tureng';
+    fragment.appendChild(link);
+
+    popup.replaceChildren(fragment);
   }
 
   function getSelectionText() {
@@ -142,22 +187,13 @@
     try {
       const results = await fetchTureng(term);
       if (results.length === 0) {
-        popup.innerHTML = `<div class="tureng-error">No results found.</div>`;
+        renderMessage(popup, 'tureng-error', 'No results found.');
         return;
       }
 
-      popup.innerHTML = `
-        <div class="tureng-title">${term}</div>
-        ${results.map((row) => `
-          <div class="tureng-row">
-            <div class="tureng-word">${row.word}</div>
-            <div class="tureng-def">${row.definition}</div>
-          </div>
-        `).join('')}
-        <a class="tureng-link" href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(term)}" target="_blank" rel="noopener">Open in Tureng</a>
-      `;
+      renderResults(popup, term, results);
     } catch (err) {
-      popup.innerHTML = `<div class="tureng-error">Failed to fetch results.</div>`;
+      renderMessage(popup, 'tureng-error', 'Failed to fetch results.');
     }
   }
 

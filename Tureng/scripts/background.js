@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === 'tureng_dclick_popup') {
     chrome.tabs.create({
-      url: "https://tureng.com/tr/turkce-ingilizce/" + info.selectionText.trim()
+      url: "https://tureng.com/tr/turkce-ingilizce/" + encodeURIComponent(info.selectionText.trim())
     });
   }
 });
@@ -28,7 +28,40 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 function stripTags(html) {
-  return html.replace(/<[^>]*>/g, '').trim();
+  return decodeHtmlEntities(html.replace(/<[^>]*>/g, '').trim());
+}
+
+function decodeHtmlEntities(text) {
+  const namedEntities = {
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    apos: "'",
+    nbsp: ' ',
+    uuml: 'ü',
+    Uuml: 'Ü',
+    ouml: 'ö',
+    Ouml: 'Ö',
+    ccedil: 'ç',
+    Ccedil: 'Ç',
+    scaron: 'ş',
+    Scaron: 'Ş',
+    igrave: 'ı',
+    Igrave: 'İ'
+  };
+
+  return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity) => {
+    if (entity[0] === '#') {
+      const isHex = entity[1].toLowerCase() === 'x';
+      const codePoint = parseInt(entity.slice(isHex ? 2 : 1), isHex ? 16 : 10);
+      return Number.isNaN(codePoint) ? match : String.fromCodePoint(codePoint);
+    }
+
+    return Object.prototype.hasOwnProperty.call(namedEntities, entity)
+      ? namedEntities[entity]
+      : match;
+  });
 }
 
 function parseResults(htmlText) {
